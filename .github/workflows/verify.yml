@@ -1,0 +1,89 @@
+name: Verify PostgreSQL application
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: '3.12'
+
+      - name: Install locked dependencies
+        run: python -m pip install -r requirements.lock.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Create temporary database credentials
+        run: |
+          umask 077
+          python - <<'PY'
+          import secrets
+          from pathlib import Path
+
+          credentials = {
+              'POSTGRES_PASSWORD': secrets.token_hex(32),
+              'APP_DB_PASSWORD': secrets.token_hex(32),
+          }
+          Path('.env').write_text(
+              ''.join(f'{name}={value}\n' for name, value in credentials.items()),
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Validate and start PostgreSQL in Docker
+        run: |
+          docker compose config --quiet
+          docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Verify database configuration and permissions
+        run: docker compose exec -T db /usr/local/bin/verify-db.sh
+
+      - name: Test the application against the real database
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          credentials = dict(
+              line.split('=', 1)
+              for line in Path('.env').read_text(encoding='utf-8').splitlines()
+          )
+          environment = os.environ.copy()
+          environment['APP_DB_PASSWORD'] = credentials['APP_DB_PASSWORD']
+          result = subprocess.run(
+              [sys.executable, '-m', 'unittest', 'discover', '-s', 'integration', '-v'],
+              env=environment,
+              check=False,
+          )
+          raise SystemExit(result.returncode)
+          PY
+
+      - name: Stop the CI database
+        if: always()
+        run: |
+          if [[ -f .env ]]; then
+            docker compose down --remove-orphans
+          fi

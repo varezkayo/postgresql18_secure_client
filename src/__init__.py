@@ -1,0 +1,1 @@
+"""Secure PostgreSQL client package."""

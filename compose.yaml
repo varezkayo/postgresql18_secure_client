@@ -1,0 +1,27 @@
+services:
+  db:
+    build: .
+    image: seminar-postgresql18:local
+    container_name: seminar-postgresql18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: seminar_db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Create .env using .env.example or setup.ps1}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Create .env using .env.example or setup.ps1}
+      # Password authentication for both TCP and Unix socket connections.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=ru_RU.UTF-8 --auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+    command: ["postgres", "-c", "config_file=/etc/postgresql/custom-postgresql.conf"]
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # PostgreSQL 18 uses /var/lib/postgresql/18/docker under this parent.
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d seminar_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  postgres_data:
