@@ -1,19 +1,8 @@
-FROM postgres:18-bookworm
-
-USER root
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends locales \
-    && sed -i 's/^# *\(ru_RU.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
-    && grep -q '^ru_RU.UTF-8 UTF-8$' /etc/locale.gen \
-    && locale-gen ru_RU.UTF-8 \
-    && locale -a | grep -qi '^ru_RU\.utf8$' \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV LANG=ru_RU.UTF-8 \
-    LC_ALL=ru_RU.UTF-8
-
-COPY docker/postgresql.conf /etc/postgresql/custom-postgresql.conf
-COPY docker/01-create-role.sh /docker-entrypoint-initdb.d/01-create-role.sh
-
-# Образ подхватывает этот файл в контексте своего entrypoint.
-RUN chmod 0644 /docker-entrypoint-initdb.d/01-create-role.sh
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && mkdir -p /app/logs && chown 10001:10001 /app/logs
+COPY pinger.py db.py config.toml ./
+USER 10001:10001
+CMD ["python", "-u", "pinger.py"]

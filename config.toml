@@ -1,8 +1,6 @@
-# Only server configuration is stored in this file.
-# User and password must be supplied interactively, never stored here.
 [database]
-host = "127.0.0.1"
+host = "db"
 port = 5432
 dbname = "seminar_db"
-connect_timeout = 5
-sslmode = "disable" # For Docker bound to loopback only, not remote networks.
+connect_timeout = 3
+sslmode = "disable"
