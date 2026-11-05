@@ -1,5 +1,3 @@
-"""Seminar 1: PostgreSQL 18 connection using secure keyword arguments."""
-
 from __future__ import annotations
 
 import getpass
@@ -13,11 +11,10 @@ ALLOWED_KEYS = {"host", "port", "dbname", "connect_timeout", "sslmode"}
 
 
 class ConfigurationError(ValueError):
-    """Invalid or unexpected connection configuration."""
+    pass
 
 
 def load_settings(path: Path = CONFIG_PATH) -> dict[str, Any]:
-    """Load and strictly validate the allowlisted TOML server settings."""
     try:
         with path.open("rb") as stream:
             config = tomllib.load(stream)
@@ -47,11 +44,6 @@ def load_settings(path: Path = CONFIG_PATH) -> dict[str, Any]:
 
 
 def connection_parameters(settings: dict[str, Any], username: str, password: str) -> dict[str, Any]:
-    """Keep login/password as *values*, never concatenate them into conninfo.
-
-    In particular, the username "seminar_user host=otherhost" cannot add
-    an extra `host` option: it remains a single `user` keyword argument.
-    """
     if not username or "\x00" in username or "\n" in username or "\r" in username:
         raise ValueError("Логин не должен быть пустым или содержать управляющие символы.")
     if not password or "\x00" in password:
@@ -86,8 +78,6 @@ def main() -> int:
     try:
         import psycopg
 
-        # psycopg itself encodes keyword values safely as libpq parameters.
-        # We never create a connection string from the user's raw input.
         with psycopg.connect(**params) as conn:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT VERSION();")
@@ -104,7 +94,6 @@ def main() -> int:
         print("Не установлен psycopg. Выполните: python -m pip install -r requirements.txt", file=sys.stderr)
         return 1
     except psycopg.Error as exc:
-        # No password, DSN, or connection params are printed here.
         print(f"Подключение или запрос не выполнены: {exc.__class__.__name__}", file=sys.stderr)
         print("Проверьте Docker, логин, пароль и config.toml.", file=sys.stderr)
         return 1
