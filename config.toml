@@ -1,6 +1,0 @@
-[database]
-host = "db"
-port = 5432
-dbname = "bookshop"
-connect_timeout = 3
-sslmode = "disable"

@@ -1,0 +1,596 @@
+{
+  "version": "2.0.0",
+  "summary": {
+    "title": "Книжный магазин",
+    "owner": "",
+    "description": "Модель угроз для практики №3.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [],
+    "reviewer": "",
+    "diagramTop": 1,
+    "threatTop": 9,
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "Потоки данных книжного магазина",
+        "diagramType": "STRIDE",
+        "version": "2.0.0",
+        "thumbnail": "",
+        "cells": [
+          {
+            "shape": "trust-boundary-box",
+            "id": "9b97981a-e92d-50ae-b2ce-bffdcab18a58",
+            "zIndex": -50,
+            "position": {
+              "x": 245,
+              "y": 46
+            },
+            "size": {
+              "width": 575,
+              "height": 430
+            },
+            "attrs": {
+              "label": {
+                "text": "B1 · Проект Docker Compose"
+              }
+            },
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "B1 · Проект Docker Compose",
+              "description": "Граница между терминалом хоста и окружением контейнеров.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "shape": "actor",
+            "id": "cd6fe58c-2778-5bcd-a98e-e72c2e97903e",
+            "zIndex": 4,
+            "position": {
+              "x": 26,
+              "y": 155
+            },
+            "size": {
+              "width": 155,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "E1\nОператор"
+              }
+            },
+            "data": {
+              "type": "tm.Actor",
+              "name": "E1 · Оператор",
+              "description": "Пользователь терминала VS Code на компьютере Windows.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": []
+            }
+          },
+          {
+            "shape": "process",
+            "id": "bf80a0df-2244-574b-8062-d7497fe69b9b",
+            "zIndex": 4,
+            "position": {
+              "x": 321,
+              "y": 134
+            },
+            "size": {
+              "width": 124,
+              "height": 124
+            },
+            "attrs": {
+              "text": {
+                "text": "P1\nPython CLI"
+              }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "P1 · Python CLI",
+              "description": "Контейнер app, запускается пользователем, собирает параметры и выполняет операции от bookshop_user.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": [
+                {
+                  "id": "40292e79-6946-5161-9906-d0284f2a0ff7",
+                  "threatId": "40292e79-6946-5161-9906-d0284f2a0ff7",
+                  "number": 1,
+                  "title": "T1 · Внедрение SQL через имя поля или значение",
+                  "description": "F1 → P1 → F3. При склейке SQL пользователь мог бы изменить структуру запроса и выйти за рамки команды меню.",
+                  "mitigation": "Есть: список разрешённых таблиц и полей, sql.Identifier для имён, параметры для значений.",
+                  "modelType": "STRIDE",
+                  "type": "Tampering",
+                  "score": "8.4",
+                  "severity": "High",
+                  "status": "Mitigated"
+                }
+              ]
+            }
+          },
+          {
+            "shape": "process",
+            "id": "6efc27ea-e827-5291-a081-9a951d632a08",
+            "zIndex": 4,
+            "position": {
+              "x": 610,
+              "y": 134
+            },
+            "size": {
+              "width": 124,
+              "height": 124
+            },
+            "attrs": {
+              "text": {
+                "text": "P2\nPostgreSQL 18"
+              }
+            },
+            "data": {
+              "type": "tm.Process",
+              "name": "P2 · PostgreSQL 18",
+              "description": "Контейнер db. Проверяет учётные данные, права и целостность данных.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": [
+                {
+                  "id": "b311352f-d9b0-5a0d-80cd-2f76c234ab1e",
+                  "threatId": "b311352f-d9b0-5a0d-80cd-2f76c234ab1e",
+                  "number": 3,
+                  "title": "T3 · Лишние права прикладной роли",
+                  "description": "P2 и D1. При выдаче прав владельца клиент мог бы удалять таблицы и изменять схему или ключи.",
+                  "mitigation": "Есть: отдельная роль, без DDL и DELETE; INSERT и UPDATE разрешены только на нужных полях.",
+                  "modelType": "STRIDE",
+                  "type": "Elevation of privilege",
+                  "score": "7.6",
+                  "severity": "High",
+                  "status": "Mitigated"
+                }
+              ]
+            }
+          },
+          {
+            "shape": "store",
+            "id": "a4f6b85b-0322-54ad-9766-9bc1832badef",
+            "zIndex": 4,
+            "position": {
+              "x": 586,
+              "y": 373
+            },
+            "size": {
+              "width": 172,
+              "height": 70
+            },
+            "attrs": {
+              "text": {
+                "text": "D1\nТом db_data"
+              }
+            },
+            "data": {
+              "type": "tm.Store",
+              "name": "D1 · Том db_data",
+              "description": "Пять таблиц магазина, индексы, каталог ролей и проверочные данные SCRAM.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": [],
+              "isALog": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "shape": "store",
+            "id": "0d0534df-4441-5077-a0a5-f68c77fb5f61",
+            "zIndex": 4,
+            "position": {
+              "x": 297,
+              "y": 373
+            },
+            "size": {
+              "width": 172,
+              "height": 70
+            },
+            "attrs": {
+              "text": {
+                "text": "D2\nТом logs"
+              }
+            },
+            "data": {
+              "type": "tm.Store",
+              "name": "D2 · Том logs",
+              "description": "Необязательный bookshop.log, включая необработанные сообщения исключений.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "29f902d6-47fd-55d1-8bac-eae884c9992b",
+                  "threatId": "29f902d6-47fd-55d1-8bac-eae884c9992b",
+                  "number": 6,
+                  "title": "T6 · Детали запросов в техническом журнале",
+                  "description": "F6 → D2. Сообщения PostgreSQL об ограничениях могут содержать имя таблицы и введённое значение, например email.",
+                  "mitigation": "Есть: дружелюбная ошибка в терминале и отдельный том. Вне учебной среды ограничить доступ и срок хранения журнала.",
+                  "modelType": "STRIDE",
+                  "type": "Information disclosure",
+                  "score": "6.2",
+                  "severity": "Medium",
+                  "status": "Open"
+                }
+              ],
+              "isALog": true,
+              "storesCredentials": false,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "17f8acd4-040c-510a-8def-31c4b7364b04",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F1 · Ввод",
+              "description": "Логин, пароль, номер команды, имя поля и значения. Пересечение границы хоста и контейнера app.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "7120a9a3-c298-54c3-b75c-90a87a68dae7",
+                  "threatId": "7120a9a3-c298-54c3-b75c-90a87a68dae7",
+                  "number": 2,
+                  "title": "T2 · Вход с известным учебным паролем",
+                  "description": "E1 → F1 → P2. Тот, кто получил доступ к Docker-сети или запустил консоль в проекте, может войти с паролем из db.env.",
+                  "mitigation": "Есть: SCRAM и закрытый наружу порт. Для реальной установки заменить публичные демопароли и хранить их отдельно.",
+                  "modelType": "STRIDE",
+                  "type": "Spoofing",
+                  "score": "8.0",
+                  "severity": "High",
+                  "status": "Open"
+                }
+              ],
+              "protocol": "Docker CLI / TTY",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F1 Ввод"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "cd6fe58c-2778-5bcd-a98e-e72c2e97903e"
+            },
+            "target": {
+              "cell": "bf80a0df-2244-574b-8062-d7497fe69b9b"
+            },
+            "vertices": [
+              {
+                "x": 251,
+                "y": 164
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "id": "2cace24c-dbf3-5bb3-9f83-717cba06f8e8",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F2 · Вывод",
+              "description": "Строки результата, подтверждение операции или короткая ошибка через stdout/stderr.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": [],
+              "protocol": "Docker CLI / TTY",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F2 Вывод"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "bf80a0df-2244-574b-8062-d7497fe69b9b"
+            },
+            "target": {
+              "cell": "cd6fe58c-2778-5bcd-a98e-e72c2e97903e"
+            },
+            "vertices": [
+              {
+                "x": 251,
+                "y": 229
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "id": "c1ce1026-4a7e-5d96-99f5-e3ddf02ebb4a",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F3 · SQL и SCRAM",
+              "description": "SCRAM при установлении соединения, затем SQL и параметры; TCP 5432 внутри сети Compose, TLS отключён.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "53453ed2-ef92-5c14-b31c-107aeb59b8eb",
+                  "threatId": "53453ed2-ef92-5c14-b31c-107aeb59b8eb",
+                  "number": 5,
+                  "title": "T5 · Отказ из-за блокировок или тяжёлых запросов",
+                  "description": "F3 → P2. Повторные запросы или длительная блокировка могут задерживать операции и расходовать подключения.",
+                  "mitigation": "Есть: лимиты пакетов и statement_timeout. Для роста нагрузки нужны ограничения соединений и мониторинг.",
+                  "modelType": "STRIDE",
+                  "type": "Denial of service",
+                  "score": "6.6",
+                  "severity": "Medium",
+                  "status": "Open"
+                }
+              ],
+              "protocol": "PostgreSQL/TCP",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F3 SQL и SCRAM"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "bf80a0df-2244-574b-8062-d7497fe69b9b"
+            },
+            "target": {
+              "cell": "6efc27ea-e827-5291-a081-9a951d632a08"
+            },
+            "vertices": [
+              {
+                "x": 529,
+                "y": 164
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "id": "96844e84-08ee-53a1-a0ce-5caa43264edb",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F4 · Результаты",
+              "description": "Ответы СУБД, строки, число изменений или ошибки; TCP 5432 внутри Compose.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "f9f88083-e3d9-5745-a4f3-9dff505dc7d9",
+                  "threatId": "f9f88083-e3d9-5745-a4f3-9dff505dc7d9",
+                  "number": 4,
+                  "title": "T4 · Перехват SQL и строк результатов",
+                  "description": "F3 и F4. Участник, способный наблюдать трафик внутри Docker-сети, видит SQL и результаты. SCRAM не шифрует весь трафик.",
+                  "mitigation": "Есть: отдельная сеть Compose, порт не опубликован. Для недоверенной сети нужен TLS с проверкой имени сервера.",
+                  "modelType": "STRIDE",
+                  "type": "Information disclosure",
+                  "score": "7.0",
+                  "severity": "High",
+                  "status": "Open"
+                }
+              ],
+              "protocol": "PostgreSQL/TCP",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F4 Результаты"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "6efc27ea-e827-5291-a081-9a951d632a08"
+            },
+            "target": {
+              "cell": "bf80a0df-2244-574b-8062-d7497fe69b9b"
+            },
+            "vertices": [
+              {
+                "x": 529,
+                "y": 229
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "id": "d2e1fea9-9038-5225-a4ad-daf3261187cf",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F5 · Данные БД",
+              "description": "Двустороннее чтение и запись файлов базы в именованный том db_data.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": false,
+              "threats": [
+                {
+                  "id": "63e7efd2-3a66-50f6-bcbc-3a7cdc79f407",
+                  "threatId": "63e7efd2-3a66-50f6-bcbc-3a7cdc79f407",
+                  "number": 8,
+                  "title": "T8 · Заказ сохранён без части позиций",
+                  "description": "P2 → F5 → D1. Если записывать заказ и позиции отдельными фиксациями, ошибка внешнего ключа оставит неполный заказ.",
+                  "mitigation": "Есть: одна транзакция для заказа и всех позиций, FK, UNIQUE и CHECK в схеме.",
+                  "modelType": "STRIDE",
+                  "type": "Tampering",
+                  "score": "5.4",
+                  "severity": "Medium",
+                  "status": "Mitigated"
+                }
+              ],
+              "protocol": "Файловая система",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": true
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F5 Данные БД"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "6efc27ea-e827-5291-a081-9a951d632a08"
+            },
+            "target": {
+              "cell": "a4f6b85b-0322-54ad-9766-9bc1832badef"
+            }
+          },
+          {
+            "shape": "flow",
+            "id": "398017ac-f092-5983-b38b-98ead74ddc07",
+            "zIndex": 10,
+            "connector": "smooth",
+            "attrs": {
+              "line": {
+                "targetMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "data": {
+              "type": "tm.Flow",
+              "name": "F6 · Журнал",
+              "description": "Добавление итогов операций и необработанных исключений в журнал, если настроен LOG_FILE.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "isTrustBoundary": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "c8582fb7-48e3-5096-82c9-da0adc8d0840",
+                  "threatId": "c8582fb7-48e3-5096-82c9-da0adc8d0840",
+                  "number": 7,
+                  "title": "T7 · Нельзя доказать, кто изменил запись",
+                  "description": "F6 → D2. Простой журнал приложения и одна общая демонстрационная роль не дают персонального аудита действий.",
+                  "mitigation": "Для эксплуатации: индивидуальные роли, время и идентификатор операции, отдельное хранилище аудита.",
+                  "modelType": "STRIDE",
+                  "type": "Repudiation",
+                  "score": "5.8",
+                  "severity": "Medium",
+                  "status": "Open"
+                }
+              ],
+              "protocol": "Файловая система",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false
+            },
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "F6 Журнал"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "bf80a0df-2244-574b-8062-d7497fe69b9b"
+            },
+            "target": {
+              "cell": "0d0534df-4441-5077-a0a5-f68c77fb5f61"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

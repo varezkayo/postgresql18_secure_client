@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Модель угроз книжного магазина</title>
+<style>
+  :root {font: 16px/1.55 system-ui,sans-serif; color:#17262e; background:#f3f6f7}
+  body {max-width:1060px; margin:0 auto; padding:2rem clamp(1rem,4vw,3rem); background:white}
+  h1,h2 {line-height:1.2; color:#153d50} h2 {margin-top:2.2em}
+  a {color:#075a82} nav {display:flex;flex-wrap:wrap;gap:.55rem 1.3rem}
+  svg {width:100%;height:auto;min-width:610px} svg text {fill:#173a4a;text-anchor:middle;font:600 17px system-ui}
+  svg .left {text-anchor:start} svg .small text {font-size:13px}
+  table {width:100%;border-collapse:collapse;margin:.6em 0 1.3em}
+  .scroll {overflow-x:auto} th,td {padding:.56rem .7rem;border:1px solid #cbd8de;text-align:left;vertical-align:top}
+  th {background:#eaf2f5} tbody tr:nth-child(even) {background:#f6f9fa}
+  code {background:#edf2f5;padding:.1em .2em}
+  @media print {:root,body {background:white} body {padding:0} tr {break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+<p>Практическая работа №4</p>
+<h1>Модель угроз книжного магазина</h1>
+<p>Объект оценки — консольное приложение из задания №3: контейнер Python, PostgreSQL 18 и два тома Docker. Приложение читает и обновляет учебные записи, создаёт заказы и пишет журнал.</p>
+<nav aria-label="Оглавление"><a href="#dfd">Диаграмма</a><a href="#stride">STRIDE</a><a href="#dread">DREAD</a><a href="#rank">Рейтинг</a><a href="#bdu">БДУ ФСТЭК</a></nav>
+</header>
+<main>
+<section id="dfd"><h2>Диаграмма потоков данных</h2>
+<p>Пунктир показывает границу хоста и проекта Docker Compose. Обмен между P1 и P2 остаётся отдельным сетевым потоком между двумя контейнерами. Порт базы не публикуется. Предполагается, что хост, Docker Desktop и исходные образы не скомпрометированы; управление этими компонентами находится вне границ модели.</p>
+<div class="scroll">
+<svg viewBox="0 0 850 493" role="img" aria-labelledby="dfd-title dfd-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="dfd-title">Потоки данных книжного магазина</title>
+  <desc id="dfd-desc">Оператор отправляет данные в Python CLI, который обменивается запросами с PostgreSQL. База хранит данные в томе db_data, приложение пишет журнал в том logs.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0 0L8 4L0 8Z" fill="#244e62"/>
+    </marker>
+  </defs>
+  <rect x="245" y="46" width="575" height="430" rx="14" fill="#f1f7f9" stroke="#648498" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="263" y="78" class="left">B1 · Проект Docker Compose</text>
+  <text x="29" y="117" class="left">Хост / VS Code</text>
+  <g fill="#fff" stroke="#244e62" stroke-width="2">
+    <rect x="26" y="155" width="155" height="80" rx="5"/>
+    <circle cx="383" cy="196" r="62"/>
+    <circle cx="672" cy="196" r="62"/>
+    <rect x="297" y="373" width="172" height="70" rx="5"/>
+    <rect x="586" y="373" width="172" height="70" rx="5"/>
+  </g>
+  <g fill="none" stroke="#244e62" stroke-width="1.8" marker-end="url(#arrow)">
+    <path d="M181 177 H323"/>
+    <path d="M324 217 H181"/>
+    <path d="M443 177 H612"/>
+    <path d="M612 217 H443"/>
+    <path d="M672 262 V368" marker-start="url(#arrow)"/>
+    <path d="M383 258 V373"/>
+  </g>
+  <g>
+    <text x="103" y="190">E1</text><text x="103" y="214">Оператор</text>
+    <text x="383" y="190">P1</text><text x="383" y="214">Python CLI</text>
+    <text x="672" y="190">P2</text><text x="672" y="214">PostgreSQL 18</text>
+    <text x="383" y="400">D2</text><text x="383" y="425">Том logs</text>
+    <text x="672" y="400">D1</text><text x="672" y="425">Том db_data</text>
+  </g>
+  <g class="small">
+    <text x="252" y="161">F1 · Ввод</text><text x="252" y="243">F2 · Вывод</text>
+    <text x="528" y="161">F3 · SQL и SCRAM</text><text x="528" y="243">F4 · Результаты</text>
+    <text x="395" y="320" class="left">F6 · Журнал</text>
+    <text x="684" y="320" class="left">F5 · Данные БД</text>
+  </g>
+</svg></div>
+<div class="scroll"><table><thead><tr><th scope="col">Элемент</th><th scope="col">Название</th><th scope="col">Назначение</th></tr></thead><tbody><tr><td>E1</td><td>Оператор</td><td>Пользователь терминала VS Code на компьютере Windows.</td></tr><tr><td>P1</td><td>Python CLI</td><td>Контейнер app, запускается пользователем, собирает параметры и выполняет операции от bookshop_user.</td></tr><tr><td>P2</td><td>PostgreSQL 18</td><td>Контейнер db. Проверяет учётные данные, права и целостность данных.</td></tr><tr><td>D1</td><td>Том db_data</td><td>Пять таблиц магазина, индексы, каталог ролей и проверочные данные SCRAM.</td></tr><tr><td>D2</td><td>Том logs</td><td>Необязательный bookshop.log, включая необработанные сообщения исключений.</td></tr></tbody></table></div>
+<div class="scroll"><table><thead><tr><th scope="col">Поток</th><th scope="col">Направление</th><th scope="col">Что передаётся</th></tr></thead><tbody><tr><td>F1</td><td>E1 → P1</td><td>Логин, пароль, номер команды, имя поля и значения. Пересечение границы хоста и контейнера app.</td></tr><tr><td>F2</td><td>P1 → E1</td><td>Строки результата, подтверждение операции или короткая ошибка через stdout/stderr.</td></tr><tr><td>F3</td><td>P1 → P2</td><td>SCRAM при установлении соединения, затем SQL и параметры; TCP 5432 внутри сети Compose, TLS отключён.</td></tr><tr><td>F4</td><td>P2 → P1</td><td>Ответы СУБД, строки, число изменений или ошибки; TCP 5432 внутри Compose.</td></tr><tr><td>F5</td><td>P2 ↔ D1</td><td>Двустороннее чтение и запись файлов базы в именованный том db_data.</td></tr><tr><td>F6</td><td>P1 → D2</td><td>Добавление итогов операций и необработанных исключений в журнал, если настроен LOG_FILE.</td></tr></tbody></table></div>
+<p>Редактируемый исходник: <a href="bookshop-threat-model.json">bookshop-threat-model.json</a>. Формат: OWASP Threat Dragon 2.x. Угрозы внесены вручную на соответствующие элементы диаграммы.</p>
+</section>
+<section id="stride"><h2>Локализация угроз по STRIDE</h2>
+<p>S — подмена личности, T — изменение данных, R — отрицание действий, I — разглашение, D — отказ в обслуживании, E — повышение привилегий. В таблице указан конкретный элемент или поток и условия сценария.</p>
+<div class="scroll"><table><thead><tr><th scope="col">ID</th><th scope="col">Категория</th><th scope="col">Где</th><th scope="col">Сценарий</th><th scope="col">Меры</th></tr></thead><tbody><tr><td>T1</td><td>T · Tampering</td><td>F1 → P1 → F3</td><td><strong>Внедрение SQL через имя поля или значение</strong><br>При склейке SQL пользователь мог бы изменить структуру запроса и выйти за рамки команды меню.</td><td>Есть: список разрешённых таблиц и полей, sql.Identifier для имён, параметры для значений.</td></tr><tr><td>T2</td><td>S · Spoofing</td><td>E1 → F1 → P2</td><td><strong>Вход с известным учебным паролем</strong><br>Тот, кто получил доступ к Docker-сети или запустил консоль в проекте, может войти с паролем из db.env.</td><td>Есть: SCRAM и закрытый наружу порт. Для реальной установки заменить публичные демопароли и хранить их отдельно.</td></tr><tr><td>T3</td><td>E · Elevation of privilege</td><td>P2 и D1</td><td><strong>Лишние права прикладной роли</strong><br>При выдаче прав владельца клиент мог бы удалять таблицы и изменять схему или ключи.</td><td>Есть: отдельная роль, без DDL и DELETE; INSERT и UPDATE разрешены только на нужных полях.</td></tr><tr><td>T4</td><td>I · Information disclosure</td><td>F3 и F4</td><td><strong>Перехват SQL и строк результатов</strong><br>Участник, способный наблюдать трафик внутри Docker-сети, видит SQL и результаты. SCRAM не шифрует весь трафик.</td><td>Есть: отдельная сеть Compose, порт не опубликован. Для недоверенной сети нужен TLS с проверкой имени сервера.</td></tr><tr><td>T5</td><td>D · Denial of service</td><td>F3 → P2</td><td><strong>Отказ из-за блокировок или тяжёлых запросов</strong><br>Повторные запросы или длительная блокировка могут задерживать операции и расходовать подключения.</td><td>Есть: лимиты пакетов и statement_timeout. Для роста нагрузки нужны ограничения соединений и мониторинг.</td></tr><tr><td>T6</td><td>I · Information disclosure</td><td>F6 → D2</td><td><strong>Детали запросов в техническом журнале</strong><br>Сообщения PostgreSQL об ограничениях могут содержать имя таблицы и введённое значение, например email.</td><td>Есть: дружелюбная ошибка в терминале и отдельный том. Вне учебной среды ограничить доступ и срок хранения журнала.</td></tr><tr><td>T7</td><td>R · Repudiation</td><td>F6 → D2</td><td><strong>Нельзя доказать, кто изменил запись</strong><br>Простой журнал приложения и одна общая демонстрационная роль не дают персонального аудита действий.</td><td>Для эксплуатации: индивидуальные роли, время и идентификатор операции, отдельное хранилище аудита.</td></tr><tr><td>T8</td><td>T · Tampering</td><td>P2 → F5 → D1</td><td><strong>Заказ сохранён без части позиций</strong><br>Если записывать заказ и позиции отдельными фиксациями, ошибка внешнего ключа оставит неполный заказ.</td><td>Есть: одна транзакция для заказа и всех позиций, FK, UNIQUE и CHECK в схеме.</td></tr></tbody></table></div>
+</section>
+<section id="dread"><h2>Расчёт DREAD</h2>
+<p>Оценки экспертные, для описанных сценариев до применения мер. Шкала 0–10: 0 — критерий отсутствует, 5 — среднее значение, 10 — максимальное. D — ущерб, R — воспроизводимость, E — простота эксплуатации, A — охват пользователей и данных, D₂ — заметность уязвимости. Чем больше балл, тем выше риск. Итог = (D + R + E + A + D₂) / 5.</p>
+<div class="scroll"><table><thead><tr><th scope="col">ID</th><th scope="col">D</th><th scope="col">R</th><th scope="col">E</th><th scope="col">A</th><th scope="col">D₂</th><th scope="col">Сумма</th><th scope="col">Среднее</th></tr></thead><tbody><tr><td>T1</td><td>9</td><td>9</td><td>8</td><td>8</td><td>8</td><td>42</td><td>8,4</td></tr><tr><td>T2</td><td>8</td><td>9</td><td>8</td><td>7</td><td>8</td><td>40</td><td>8,0</td></tr><tr><td>T3</td><td>9</td><td>7</td><td>6</td><td>8</td><td>8</td><td>38</td><td>7,6</td></tr><tr><td>T4</td><td>8</td><td>7</td><td>5</td><td>8</td><td>7</td><td>35</td><td>7,0</td></tr><tr><td>T5</td><td>7</td><td>7</td><td>6</td><td>7</td><td>6</td><td>33</td><td>6,6</td></tr><tr><td>T6</td><td>7</td><td>7</td><td>6</td><td>5</td><td>6</td><td>31</td><td>6,2</td></tr><tr><td>T7</td><td>6</td><td>7</td><td>6</td><td>5</td><td>5</td><td>29</td><td>5,8</td></tr><tr><td>T8</td><td>6</td><td>6</td><td>5</td><td>5</td><td>5</td><td>27</td><td>5,4</td></tr></tbody></table></div>
+<p>Пример: у T1 сумма 42, среднее 8,4. Ввод легко повторять, а запрос при отсутствии защиты способен затронуть несколько таблиц. У T4 балл эксплуатации ниже: сначала нужен доступ к внутреннему трафику.</p>
+</section>
+<section id="rank"><h2>Итоговый список по убыванию риска</h2>
+<p>Высокий: от 7,0. Средний: от 4,0 до 6,9. Низкий: до 3,9. Статус показывает состояние мер в учебном проекте; он не меняет исходный балл сценария.</p>
+<div class="scroll"><table><thead><tr><th scope="col">Место</th><th scope="col">ID</th><th scope="col">Угроза</th><th scope="col">Балл</th><th scope="col">Уровень</th><th scope="col">Статус</th></tr></thead><tbody><tr><td>1</td><td>T1</td><td>Внедрение SQL через имя поля или значение</td><td>8,4</td><td>высокий</td><td>меры реализованы</td></tr><tr><td>2</td><td>T2</td><td>Вход с известным учебным паролем</td><td>8,0</td><td>высокий</td><td>остаётся открытой</td></tr><tr><td>3</td><td>T3</td><td>Лишние права прикладной роли</td><td>7,6</td><td>высокий</td><td>меры реализованы</td></tr><tr><td>4</td><td>T4</td><td>Перехват SQL и строк результатов</td><td>7,0</td><td>высокий</td><td>остаётся открытой</td></tr><tr><td>5</td><td>T5</td><td>Отказ из-за блокировок или тяжёлых запросов</td><td>6,6</td><td>средний</td><td>остаётся открытой</td></tr><tr><td>6</td><td>T6</td><td>Детали запросов в техническом журнале</td><td>6,2</td><td>средний</td><td>остаётся открытой</td></tr><tr><td>7</td><td>T7</td><td>Нельзя доказать, кто изменил запись</td><td>5,8</td><td>средний</td><td>остаётся открытой</td></tr><tr><td>8</td><td>T8</td><td>Заказ сохранён без части позиций</td><td>5,4</td><td>средний</td><td>меры реализованы</td></tr></tbody></table></div>
+</section>
+<section id="bdu"><h2>Пять приоритетных угроз и БДУ ФСТЭК</h2>
+<p>Это смысловое сопоставление сценариев проекта с общими карточками <a href="https://bdu.fstec.ru/threat">Банка данных угроз ФСТЭК России</a>. Ссылки ведут на официальный каталог. При подготовке официальный сайт не отвечал; названия и номера дополнительно сверены с <a href="https://gramotaib.ru/threats/kategoriya/os">публичным справочником</a>.</p>
+<div class="scroll"><table><thead><tr><th scope="col">Угроза</th><th scope="col">Карточка БДУ</th><th scope="col">Название</th><th scope="col">Почему подходит</th></tr></thead><tbody><tr><td>T1</td><td><a href="https://bdu.fstec.ru/threat/ubi.006">УБИ.006</a></td><td>Угроза внедрения кода или данных</td><td>Ввод встраивается в команду, если не отделить код от данных.</td></tr><tr><td>T2</td><td><a href="https://bdu.fstec.ru/threat/ubi.030">УБИ.030</a></td><td>Угроза использования информации идентификации/аутентификации, заданной по умолчанию</td><td>Публичные демонстрационные данные играют роль предсказуемых начальных учётных данных.</td></tr><tr><td>T3</td><td><a href="https://bdu.fstec.ru/threat/ubi.122">УБИ.122</a></td><td>Угроза повышения привилегий</td><td>Модель показывает последствия ошибочной выдачи прав сверх прикладных полномочий.</td></tr><tr><td>T4</td><td><a href="https://bdu.fstec.ru/threat/ubi.034">УБИ.034</a></td><td>Угроза использования слабостей протоколов сетевого/локального обмена данными</td><td>Незашифрованный транспорт делает содержимое обмена доступным при перехвате.</td></tr><tr><td>T5</td><td><a href="https://bdu.fstec.ru/threat/ubi.140">УБИ.140</a></td><td>Угроза приведения системы в состояние «отказ в обслуживании»</td><td>Недоступность для остальных операторов при перегрузке или удержании блокировок.</td></tr></tbody></table></div>
+</section>
+</main>
+</body></html>
