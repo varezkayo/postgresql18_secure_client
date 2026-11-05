@@ -12,3 +12,5 @@ python -m venv .venv
 Логин — `seminar_user`. Пароль — значение `APP_DB_PASSWORD` из `.env`. Клиент читает адрес из `config.toml`, подключается и показывает результат `SELECT VERSION()`. Логин и пароль передаются драйверу отдельно от остальных настроек.
 
 PostgreSQL использует `ru_RU.UTF-8` и SCRAM-SHA-256; порт доступен только с этого компьютера. Остановить: `docker compose down`.
+
+Другие работы: [2 — pinger](https://github.com/varezkayo/postgresql18_secure_client/tree/task-2), [3 — книжный магазин](https://github.com/varezkayo/postgresql18_secure_client/tree/task-3), [4 — модель угроз](https://github.com/varezkayo/postgresql18_secure_client/tree/task-4).
