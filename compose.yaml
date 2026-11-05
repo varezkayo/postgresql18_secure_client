@@ -1,27 +1,29 @@
 services:
   db:
-    build: .
-    image: seminar-postgresql18:local
-    container_name: seminar-postgresql18
+    image: postgres:18-bookworm
+    env_file: db.env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_DB: seminar_db
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Create .env using .env.example}
-      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Create .env using .env.example}
-      # Password authentication for both TCP and Unix socket connections.
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=ru_RU.UTF-8 --auth-host=scram-sha-256 --auth-local=scram-sha-256"
-      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
-    command: ["postgres", "-c", "config_file=/etc/postgresql/custom-postgresql.conf"]
-    ports:
-      - "127.0.0.1:5432:5432"
+      POSTGRES_DB: bookshop
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
     volumes:
-      # PostgreSQL 18 uses /var/lib/postgresql/18/docker under this parent.
-      - postgres_data:/var/lib/postgresql
+      - db_data:/var/lib/postgresql
+      - ./sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d seminar_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 15
-
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d bookshop"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  app:
+    build: .
+    image: seminar-bookshop:3
+    env_file: demo.env
+    stdin_open: true
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - logs:/app/logs
 volumes:
-  postgres_data:
+  db_data:
+  logs:
