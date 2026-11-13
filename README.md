@@ -1,16 +1,4 @@
-# Задание 1. Подключение к PostgreSQL 18
+# Разработка защищенных программных систем
 
-Нужны Docker Desktop и Python 3.11 или новее. Для первого запуска скопируйте `.env.example` в `.env` и задайте два разных локальных пароля.
-
-```powershell
-docker compose up -d --build --wait
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m src.app
-```
-
-Логин — `seminar_user`. Пароль — значение `APP_DB_PASSWORD` из `.env`. Клиент читает адрес из `config.toml`, подключается и показывает результат `SELECT VERSION()`. Логин и пароль передаются драйверу отдельно от остальных настроек.
-
-PostgreSQL использует `ru_RU.UTF-8` и SCRAM-SHA-256; порт доступен только с этого компьютера. Остановить: `docker compose down`.
-
-Другие работы: [2 — pinger](https://github.com/varezkayo/postgresql18_secure_client/tree/task-2), [3 — книжный магазин](https://github.com/varezkayo/postgresql18_secure_client/tree/task-3), [4 — модель угроз](https://github.com/varezkayo/postgresql18_secure_client/tree/task-4).
+- [Лаба 1. Подключение к PostgreSQL](https://github.com/varezkayo/postgresql18_secure_client/tree/lab-1)
+- [Лаба 2. Проверка доступности PostgreSQL](https://github.com/varezkayo/postgresql18_secure_client/tree/lab-2)
