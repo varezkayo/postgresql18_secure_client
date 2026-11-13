@@ -1,24 +1,47 @@
-# Лаба 1. Подключение к PostgreSQL
+# Лаба 2. Проверка доступности PostgreSQL
 
-Цель: подключиться к PostgreSQL 18 и выполнить `SELECT VERSION();`.
+Цель: на основе первой работы сделать сервис, который раз в 5 минут выполняет `SELECT VERSION();`.
 
-Нужны Docker Desktop и Python 3.10 или новее. Команды выполняются из папки работы.
+Нужен Docker Desktop. Команды выполняются из папки работы в PowerShell.
 
 ```powershell
-docker compose up -d --build --wait
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe app.py
+$env:PINGER_ENV_FILE = "demo.env"
+docker compose build
+docker compose up -d --wait db
+docker compose up -d pinger
+docker compose logs -f pinger
 ```
 
-Логин: `student`. Пароль: `student_demo_password`. Это учебные значения.
-При правильном вводе программа выводит версию PostgreSQL, при неверном — сообщение об ошибке.
+Собираются образы `lab2-postgres:18` и `lab2-pinger:1.0`.
+Путь к Env-файлу передаётся через `PINGER_ENV_FILE` в Compose.
+В `demo.env` заданы учебные логин и пароль, интервал `CHECK_INTERVAL=300` секунд
+и путь дублирования логов `LOG_FILE=/logs/pinger.log`.
+Чтобы не писать в файл, удалите строку `LOG_FILE`.
 
-Адрес, порт и имя базы читаются из `config.json` рядом с программой.
-Логин и пароль вводятся с клавиатуры и передаются драйверу отдельными параметрами.
-Поэтому ввод вроде `student host=other` останется логином, а не изменит адрес подключения.
+Программа читает адрес базы из `config.json`, а логин и пароль — из окружения.
+Успешный и необычный ответ попадает в stdout, ошибка — в stderr.
+Каждая проверка ограничена 15 секундами. После ошибки выполняется следующая проверка.
+Копия логов сохраняется на компьютере в `logs/pinger.log`.
 
-База использует локаль `ru_RU.UTF-8` и аутентификацию SCRAM-SHA-256.
-Пользователю выданы `CONNECT` к базе и `USAGE` к схеме `public`.
+Проверка восстановления после ошибки:
+
+```powershell
+docker compose down
+docker compose up -d pinger
+docker compose logs -f pinger
+```
+
+Дождитесь сообщения об ошибке и нажмите Ctrl+C — это закроет просмотр логов.
+Затем запустите базу:
+
+```powershell
+docker compose up -d --wait db
+docker compose logs -f pinger
+```
+
+При следующей проверке появится успешный ответ. Для быстрой демонстрации можно
+временно заменить `CHECK_INTERVAL=300` на `CHECK_INTERVAL=10` в `demo.env`
+перед запуском pinger. После изменения Env-файла пересоздайте контейнер:
+`docker compose up -d --force-recreate pinger`.
 
 Остановка: `docker compose down`.

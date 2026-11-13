@@ -1,6 +1,8 @@
-FROM postgres:18-bookworm
+FROM python:3.12-slim
 
-RUN localedef -i ru_RU -c -f UTF-8 -A /usr/share/locale/locale.alias ru_RU.UTF-8
-ENV LANG=ru_RU.UTF-8
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app.py config.json ./
 
-COPY init.sql /docker-entrypoint-initdb.d/init.sql
+CMD ["python", "-u", "app.py"]

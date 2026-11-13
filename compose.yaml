@@ -1,17 +1,15 @@
-name: lab1
+name: lab2
 
 services:
   db:
-    build: .
-    image: lab1-postgres:18
+    build: ./db
+    image: lab2-postgres:18
     environment:
       POSTGRES_DB: lab_db
       POSTGRES_PASSWORD: postgres_demo_password
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=ru_RU.UTF-8 --auth-host=scram-sha-256"
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
     command: ["postgres", "-c", "password_encryption=scram-sha-256"]
-    ports:
-      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
@@ -19,6 +17,14 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+
+  pinger:
+    image: lab2-pinger:1.0
+    build: .
+    env_file:
+      - ${PINGER_ENV_FILE:-demo.env}
+    volumes:
+      - ./logs:/logs
 
 volumes:
   pgdata:
