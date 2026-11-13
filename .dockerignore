@@ -1,6 +1,4 @@
-.env
-.venv/
-.git/
-__pycache__/
-*.pyc
-local_credentials.txt
+.git
+.venv
+__pycache__
+*.log
